@@ -24,6 +24,18 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 8080
-        env:
-          - name: SPRING_PROFILES_ACTIVE
-            value: kube
+        volumeMounts:
+          - name: application-config
+            mountPath: "/app/config"
+            readOnly: true
+          - mountPath: /tmp
+            name: tmp
+      volumes:
+        - name: application-config
+          configMap:
+            name: customer-support-configmap-generator
+            items:
+            - key: service.properties
+              path: application.properties
+            - key: logback.xml
+              path: logback.xml
