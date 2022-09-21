@@ -19,19 +19,27 @@ repositories {
 }
 
 ext {
-    set('springCloudVersion', "2021.0.4")
+    springBootVersion = "2.7.3"
+    springCloudVersion = "2021.0.4"
+    springdocOpenapiUiVersion = '1.6.11'
+    lombokVersion = '1.18.24'
+    sleuthZipkinVersion = '3.1.4'
+    mockitoVersion = '4.8.0'
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-quartz'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-quartz:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    implementation "org.springframework.cloud:spring-cloud-sleuth-zipkin:$sleuthZipkinVersion"
+    implementation "org.springdoc:springdoc-openapi-ui:$springdocOpenapiUiVersion"
+    testImplementation "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    developmentOnly "org.springframework.boot:spring-boot-devtools:$springBootVersion"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
 }
 
 dependencyManagement {
