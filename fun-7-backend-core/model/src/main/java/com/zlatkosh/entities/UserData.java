@@ -41,4 +41,10 @@ public class UserData {
     @Type(type = "org.hibernate.type.TextType")
     @Getter
     private String timeZone;
+
+    @NotNull
+    @Column(name = "play_count", nullable = false)
+    @Getter
+    @Setter
+    private Integer playCount;
 }

@@ -12,6 +12,7 @@ CREATE TABLE user_data
     password   TEXT    NOT NULL,
     country_id INTEGER NOT NULL,
     time_zone  TEXT    NOT NULL,
+    play_count INTEGER NOT NULL,
     CONSTRAINT fk_user_to_country
         FOREIGN KEY (country_id)
             REFERENCES country_data (country_id)
@@ -37,12 +38,12 @@ VALUES ('Slovenia', 'SI');
 INSERT INTO country_data (country_name, two_letter_code)
 VALUES ('Denmark', 'DK');
 --INSERT DATA in user_data
-INSERT INTO user_data (username, password, country_id, time_zone)
-VALUES ('admin_user'::text, '{noop}password'::text, 1, 'America/New_York');
-INSERT INTO user_data (username, password, country_id, time_zone)
-VALUES ('user_US'::text, '{noop}password_US'::text, 1, 'America/New_York');
-INSERT INTO user_data (username, password, country_id, time_zone)
-VALUES ('user_SI'::text, '{noop}password_SI'::text, 2, 'Europe/Ljubljana');
+INSERT INTO user_data (username, password, country_id, time_zone, play_count)
+VALUES ('admin_user'::text, '{noop}password'::text, 1, 'America/New_York', 0);
+INSERT INTO user_data (username, password, country_id, time_zone, play_count)
+VALUES ('user_US'::text, '{noop}password_US'::text, 1, 'America/New_York', 0);
+INSERT INTO user_data (username, password, country_id, time_zone, play_count)
+VALUES ('user_SI'::text, '{noop}password_SI'::text, 2, 'Europe/Ljubljana', 0);
 --INSERT DATA in role
 INSERT INTO role (username, role_name, description)
 VALUES ('admin_user', 'ADMIN', 'Admin role having admin API permissions.');
