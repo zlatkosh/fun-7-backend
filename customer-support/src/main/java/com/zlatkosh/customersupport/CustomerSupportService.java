@@ -24,6 +24,7 @@ public class CustomerSupportService {
 
     Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
     public CustomerSupportStatus checkStatus(ZonedDateTime zonedDateTime) {
+        log.debug("Executing checkStatus for zonedDateTime '%s'.".formatted(zonedDateTime.toString()));
         LocalDateTime localDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(TIME_ZONE_EUROPE_LJUBLJANA)).toLocalDateTime();
         return new CustomerSupportStatus(checkIfEnabled(localDateTime), constructAvailabilityMessage());
     }

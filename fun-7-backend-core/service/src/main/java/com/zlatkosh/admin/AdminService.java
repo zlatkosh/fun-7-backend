@@ -38,6 +38,7 @@ class AdminService {
                     .build();
 
     List<UserDetails> listAllUsers(Pageable pageable) {
+        log.debug("Executing listAllUsers for pageable '%s'.".formatted(pageable.toString()));
         return userRepository.findAll(pageable)
                 .stream()
                 .map(userDataToUserDetailsMapper)
@@ -45,6 +46,7 @@ class AdminService {
     }
 
     UserDetails getUserDetails(String username) {
+        log.debug("Executing getUserDetails for username '%s'.".formatted(username));
         Optional<UserData> optionalUserData = userRepository.findById(username);
         if (optionalUserData.isPresent()) {
             return optionalUserData.map(userDataToUserDetailsMapper).get();
@@ -54,6 +56,7 @@ class AdminService {
     }
 
     void deleteUser(String username) {
+        log.debug("Executing deleteUser for username '%s'.".formatted(username));
         userRepository.deleteById(username);
     }
 }

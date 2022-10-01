@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,7 +32,9 @@ public class AdsService {
     @Value("${service.ads.adPartnerPassword}")
     private String adPartnerPassword;
 
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 100))
     public AdsStatus checkStatus(String countryCode) {
+        log.debug("Executing checkStatus for countryCode '%s'.".formatted(countryCode));
         AdPartnerResponse adPartnerResponse =
                 restTemplate.exchange(
                         adPartnerUrl,

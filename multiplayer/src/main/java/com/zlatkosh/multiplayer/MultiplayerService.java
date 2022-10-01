@@ -17,6 +17,7 @@ public class MultiplayerService extends MultiplayerServiceConfig {
     private String availabilityMessagePattern;
 
     public MultiplayerStatus checkStatus(int playCount, String countryCode) {
+        log.debug("Executing checkStatus for playCount '%d' and countryCode '%s'.".formatted(playCount, countryCode));
         boolean eligible = playCount > minimumPlayCount && eligibleCountryCodes.contains(countryCode);
         return new MultiplayerStatus(eligible, constructAvailabilityMessage());
     }
