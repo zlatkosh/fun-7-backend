@@ -23,18 +23,18 @@ public class CustomerSupportService {
     private LocalTime availabilityEndTime;
 
     Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
-    public CustomerSupportStatus checkStatus() {
-        LocalDateTime currentDateTime = LocalDateTime.now(Clock.system(ZoneId.of(TIME_ZONE_EUROPE_LJUBLJANA)));
-        return new CustomerSupportStatus(checkIfEnabled(currentDateTime), constructAvailabilityMessage());
+    public CustomerSupportStatus checkStatus(ZonedDateTime zonedDateTime) {
+        LocalDateTime localDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(TIME_ZONE_EUROPE_LJUBLJANA)).toLocalDateTime();
+        return new CustomerSupportStatus(checkIfEnabled(localDateTime), constructAvailabilityMessage());
     }
 
-    String constructAvailabilityMessage() {
+     private String constructAvailabilityMessage() {
 
         return availabilityMessagePattern
                 .formatted(availabilityStartTime, availabilityEndTime);
     }
 
-    boolean checkIfEnabled(LocalDateTime currentDateTime) {
+    private boolean checkIfEnabled(LocalDateTime currentDateTime) {
         LocalTime currentTime = currentDateTime.toLocalTime();
         return !WEEKEND_DAYS.contains(currentDateTime.getDayOfWeek()) && currentTime.isAfter(availabilityStartTime) && currentTime.isBefore(availabilityEndTime);
     }
