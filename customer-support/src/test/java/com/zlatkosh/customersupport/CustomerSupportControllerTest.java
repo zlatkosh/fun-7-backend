@@ -11,7 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.ZonedDateTime;
+
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -28,11 +31,12 @@ public class CustomerSupportControllerTest {
     private CustomerSupportService service;
 
     @Test
-    public void when_checkStatus_then_return_success_reply() throws Exception{
-        when(service.checkStatus())
+    public void WHEN_checkStatus_THEN_return_success_reply() throws Exception {
+        when(service.checkStatus(any(ZonedDateTime.class)))
                 .thenReturn(new CustomerSupportStatus(true, "Mock availability message"));
 
         mvc.perform(get("/customer-support/check-status")
+                        .param("zonedDateTime", "2007-12-03T10:15:30+01:00[Europe/Paris]")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content()
@@ -42,11 +46,23 @@ public class CustomerSupportControllerTest {
     }
 
     @Test
-    public void when_checkStatus_throws_exception_then_return_internal_server_error_reply() throws Exception{
-        when(service.checkStatus())
+    public void WHEN_checkStatus_invalid_input_format_THEN_return_bad_request_reply() throws Exception {
+        when(service.checkStatus(any(ZonedDateTime.class)))
+                .thenReturn(new CustomerSupportStatus(true, "Mock availability message"));
+
+        mvc.perform(get("/customer-support/check-status")
+                        .param("zonedDateTime", "invalid format input")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void WHEN_checkStatus_throws_exception_THEN_return_internal_server_error_reply() throws Exception {
+        when(service.checkStatus(any(ZonedDateTime.class)))
                 .thenThrow(new RuntimeException("Failed to check status"));
 
         mvc.perform(get("/customer-support/check-status")
+                        .param("zonedDateTime", "2007-12-03T10:15:30+01:00[Europe/Paris]")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }

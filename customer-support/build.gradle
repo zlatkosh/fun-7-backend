@@ -7,11 +7,22 @@ plugins {
 group = 'com.zlatkosh'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
+archivesBaseName = "customer-support"
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+}
+
+
+bootJar {
+    archiveBaseName = "customer-support-boot"
+    launchScript()
+}
+
+springBoot {
+    buildInfo()
 }
 
 repositories {
@@ -20,7 +31,6 @@ repositories {
 
 ext {
     springBootVersion = "2.7.3"
-    springCloudVersion = "2021.0.4"
     springdocOpenapiUiVersion = '1.6.11'
     lombokVersion = '1.18.24'
     sleuthZipkinVersion = '3.1.4'
@@ -28,11 +38,10 @@ ext {
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     implementation "org.springframework.boot:spring-boot-starter-quartz:$springBootVersion"
     implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
-    implementation "org.springframework.cloud:spring-cloud-sleuth-zipkin:$sleuthZipkinVersion"
     implementation "org.springdoc:springdoc-openapi-ui:$springdocOpenapiUiVersion"
+    developmentOnly "org.springframework.boot:spring-boot-devtools:$springBootVersion"
     testImplementation "org.projectlombok:lombok:$lombokVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     compileOnly "org.projectlombok:lombok:$lombokVersion"
@@ -40,12 +49,6 @@ dependencies {
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
 }
 
 tasks.named('test') {
