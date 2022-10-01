@@ -1,0 +1,5 @@
+dependencies {
+    implementation dep.validationApi
+    implementation dep.springBootStarterJpa
+
+}

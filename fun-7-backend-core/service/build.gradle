@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(':model')
+    implementation project(':data-access')
+
+    implementation dep.springBootStarterJpa
+    implementation dep.springBootStarterValidation
+    implementation dep.springRetry
+    implementation dep.springAspects
+}
