@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':model')
+
+    implementation dep.flyway
+    implementation dep.springBootStarterJpa
+    implementation dep.testContainerPostgres
+    testImplementation dep.testContainersJunitJupiter
+    testImplementation dep.testContainers
+    runtimeOnly dep.postgresql
+}

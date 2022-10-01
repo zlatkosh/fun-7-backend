@@ -1,13 +1,13 @@
-package com.zlatkosh.core;
+package com.zlatkosh;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CoreApplication {
+public class DataAccessApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CoreApplication.class, args);
+        SpringApplication.run(DataAccessApplication.class, args);
     }
 
 }
