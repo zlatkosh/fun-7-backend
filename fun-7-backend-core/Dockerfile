@@ -8,6 +8,6 @@ FROM openjdk:17-jdk-alpine
 RUN addgroup -S eweksd && adduser -S eweksd -G eweksd
 USER eweksd
 WORKDIR /app
-COPY --from=gradle /tmp/build/libs/multiplayer-boot*.jar multiplayer.jar
+COPY --from=gradle /tmp/server/build/libs/fun-7-backend-core-boot*.jar fun-7-backend-core.jar
 
-ENTRYPOINT ["java","-jar","multiplayer.jar"]
+ENTRYPOINT ["java","-jar","fun-7-backend-core.jar"]
