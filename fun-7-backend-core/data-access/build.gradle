@@ -8,3 +8,6 @@ dependencies {
     testImplementation dep.testContainers
     runtimeOnly dep.postgresql
 }
+jar {
+    exclude('DB_datasource.properties')
+}

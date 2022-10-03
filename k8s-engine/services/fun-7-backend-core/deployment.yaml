@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fun-7-backend-core-deployment
+spec:
+  selector:
+    matchLabels:
+      app: fun-7-backend-core
+  template:
+    metadata:
+      labels:
+        app: fun-7-backend-core
+    spec:
+      containers:
+        - name: fun-7-backend-core
+          image: "europe-west1-docker.pkg.dev/fun-7-gcloud-project/fun-7-gcloud-project-repo/fun-7-backend-core"
+          imagePullPolicy: Always
+          command: [ "java", "-Dloader.path=config", "-jar", "fun-7-backend-core.jar"]
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /swagger-ui/index.html
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kube
+            - name: SPRING_CONFIG_LOCATION
+              value: "/app/config/"
+            - name: SERVICE_DATASOURCE_POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: fun-7-backend-core-credentials
+                  key: dbUsername
+            - name: SERVICE_DATASOURCE_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fun-7-backend-core-credentials
+                  key: dbPassword
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "500m"
+            limits:
+              memory: "256Mi"
+              cpu: "2500m"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: application-config
+              mountPath: "/app/config"
+              readOnly: true
+      volumes:
+        - name: application-config
+          configMap:
+            name: fun-7-backend-core-configmap-generator
+            items:
+              - key: application-kube.properties
+                path: application-kube.properties
+              - key: DB_datasource.properties
+                path: DB_datasource.properties

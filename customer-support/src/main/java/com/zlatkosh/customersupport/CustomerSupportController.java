@@ -37,8 +37,8 @@ public class CustomerSupportController {
     @ResponseBody
     public CustomerSupportStatus checkStatus(@RequestParam("zonedDateTime") String zonedDateTime) {
         try {
-            log.info("Input zonedDateTime: %s".formatted(ZonedDateTime.parse(zonedDateTime)));
-            return customerSupportService.checkStatus(ZonedDateTime.parse(zonedDateTime));
+            log.info("Input zonedDateTime: %s".formatted(ZonedDateTime.parse(zonedDateTime.replaceAll(" ", "+"))));
+            return customerSupportService.checkStatus(ZonedDateTime.parse(zonedDateTime.replaceAll(" ", "+")));
         } catch (DateTimeParseException e) {
             log.error("Bad request", e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ("Bad request! '%s' could not be converted to " +
