@@ -1,0 +1,13 @@
+apiVersion: "networking.k8s.io/v1"
+kind: "Ingress"
+metadata:
+  name: "fun-7-backend-core-router"
+  namespace: "default"
+spec:
+  defaultBackend:
+    service:
+      name: "fun-7-backend-core-service"
+      port:
+        number: 80
+status:
+  loadBalancer: { }

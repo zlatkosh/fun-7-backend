@@ -1,29 +1,56 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: multiplayer-deployment
+  name: ads-deployment
 spec:
   selector:
     matchLabels:
-      app: multiplayer
+      app: ads
   template:
     metadata:
       labels:
-        app: multiplayer
+        app: ads
     spec:
       containers:
-      - name: multiplayer
-        image: fun-7-backend/multiplayer:latest
-        imagePullPolicy: Always
-        resources:
-          requests:
-            memory: "32Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8080
-        env:
-          - name: SPRING_PROFILES_ACTIVE
-            value: kube
+        - name: ads
+          image: "europe-west1-docker.pkg.dev/fun-7-gcloud-project/fun-7-gcloud-project-repo/ads"
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /swagger-ui/index.html
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kube
+            - name: SPRING_CONFIG_LOCATION
+              value: "/app/deployments/config/"
+            - name: SERVICE_ADS_ADPARTNERUSERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ads-credentials
+                  key: adPartnerUsername
+            - name: SERVICE_ADS_ADPARTNERPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-credentials
+                  key: adPartnerPassword
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: application-config
+              mountPath: "/app/deployments/config"
+              readOnly: true
+      volumes:
+        - name: application-config
+          configMap:
+            name: ads-configmap-generator
+            items:
+              - key: application-kube.properties
+                path: application-kube.properties

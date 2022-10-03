@@ -12,7 +12,12 @@ dependencies {
 
 bootJar {
     archiveBaseName = "fun-7-backend-core-boot"
+    exclude('application.properties')
+    exclude('DB_datasource.properties')
     launchScript()
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+    }
 }
 
 springBoot {

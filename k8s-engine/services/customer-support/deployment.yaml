@@ -13,8 +13,17 @@ spec:
     spec:
       containers:
       - name: customer-support
-        image: fun-7-backend/customer-support:latest
+        image: "europe-west1-docker.pkg.dev/fun-7-gcloud-project/fun-7-gcloud-project-repo/customer-support"
         imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            port: 8080
+            path: /swagger-ui/index.html
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: kube
+          - name: SPRING_CONFIG_LOCATION
+            value: "/app/deployments/config/"
         resources:
           requests:
             memory: "32Mi"
@@ -26,16 +35,12 @@ spec:
         - containerPort: 8080
         volumeMounts:
           - name: application-config
-            mountPath: "/app/config"
+            mountPath: "/app/deployments/config"
             readOnly: true
-          - mountPath: /tmp
-            name: tmp
       volumes:
         - name: application-config
           configMap:
             name: customer-support-configmap-generator
             items:
-            - key: service.properties
-              path: application.properties
-            - key: logback.xml
-              path: logback.xml
+            - key: application-kube.properties
+              path: application-kube.properties
