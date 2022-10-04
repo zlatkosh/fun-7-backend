@@ -7,12 +7,58 @@ This project consists of 4 different microservices.
  - [ads](ads) exposing a REST API which tells a user that ads have been enabled for him only
    if a call to an external REST API confirms that's the case.
  - [fun-7-backend-core](fun-7-backend-core): exposes 2 REST APIs:
-   - **Check services API**: Returning the status of the three previous microservices for the logged-in user.  
-   - **Admin API**: used by administrators to enable managing of users.
+   - **Check services API**: Returning the status of the three previous microservices for the logged-in user (logged-in user must have user role **USER**).  
+   - **Admin API**: used by administrators to enable managing of users (logged-in user must have user role **ADMIN**).
 
 All 4 services are built using **Java 17**.  
 [ads](ads) uses **maven-3.8.6** while all other microservices use **gradle-7.5** as a build/dependency management solution.  
 They are all **Spring boot 2.7.3** REST Server applications.
+
+A Swagger UI is available with mapping **/swagger-ui/index.html** for all 4 microservices.
+The Swagger UI however does not expose the [fun-7-backend-core](fun-7-backend-core) microservice login and refresh_token endpoints described below.
+
+[V1_\_init_db.sql](fun-7-backend-core/data-access/src/main/resources/db/migration/V1__init_db.sql) is a DB init script which gets executed by [FlyWay](https://flywaydb.org/documentation/usage/plugins/springboot)
+the first time we run [fun-7-backend-core](fun-7-backend-core) and creates the DB schema and initial test data.
+
+### fun-7-backend-core login endpoint
+To log in to the [fun-7-backend-core](fun-7-backend-core) microservice and use its APIs we are using a basic login POST endpoint taking HTTP parameters **username** and **password** as input (sample request below).
+``` http request
+POST http://localhost:9093/login?username=myUsername&password=myPassword
+```
+[V1_\_init_db.sql](fun-7-backend-core/data-access/src/main/resources/db/migration/V1__init_db.sql) Contains the inserts for usernames and passwords
+which can be used by the login endpoint. i.e. **username=user_US&password=password_US** (both taken from V1__init_db.sql)  
+The login endpoint returns a JSON response containing JSON Web Token (JWT) type, access and refresh token.
+```json
+{
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJyZWZyZXNoRHVyYXRpb24iOjEyM30.-gyh--a5k3LFQS4U2Lyjv_YTGge_y9na0dsszY0nm8A"
+}
+```
+> **⚠ Warning**  
+> All other APIs in this microservice can ONLY be accessed with a valid **accessToken** returned by this API.  
+> They require for it to be provided in the Authorization header of their request as seen below!
+> ```
+> Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+> ```
+> Whenever the **accessToken** expires a call to endpoint `GET http://<host>:<port>/access/refresh_token` is needed, to get a new valid access token.
+> This call must have the login response **refreshToken** in the Authorization header as seen below:
+> ```
+> Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJyZWZyZXNoRHVyYXRpb24iOjEyM30.-gyh--a5k3LFQS4U2Lyjv_YTGge_y9na0dsszY0nm8A
+> ```
+> The **refresh_token** reply will be the same type of JSON message as after calling the login endpoint,
+> it will also contain the same exact **refreshToken**, but it will return a new valid **accessToken** for other APIs to use.  
+> **After the refreshToken also expires a new call to the login endpoint is needed to get a new accessToken/refreshToken set**
+
+The duration of the **accessToken** and **refreshToken** is configurable through the 2 parameters below found in [application.properties](fun-7-backend-core/server/src/main/resources/application.properties)
+``` properties
+#**spring security and JWT configuration**
+#refresh token/play session expiry in milliseconds. Default is 60 minutes: 60*60*1000=3600000
+app.security.expiry.refresh-token=3600000
+#access token expiry in milliseconds. Default is 10 minutes: 10*60*1000=600000
+app.security.expiry.access-token=600000
+```
+The secret used to encode both JWTs is hardcoded in constant [JwtUtility.SECRET_KEY](fun-7-backend-core/controller/src/main/java/com/zlatkosh/security/JwtUtility.java)
+
 
 ## Unit and Integration testing
 Unit testing in these modules is performed using Junit 5 (Jupiter).  
@@ -22,10 +68,13 @@ Integration testing on the Database layer is performed using:
 - [V1_\_init_db.sql](fun-7-backend-core/data-access/src/main/resources/db/migration/V1__init_db.sql)
 is a DB init script which gets executed by [FlyWay](https://flywaydb.org/documentation/usage/plugins/springboot)
 and creates the DB schema and initial test data.
-- GWT unit tests inside Junit Jupiter @Nested classes
+- GWT unit tests inside Junit Jupiter @Nested classes  
+
+
 ## Setting the applications up in Google Cloud
+![Architectural diagram](metadata/Architectural_diagram.png)
 A Google Cloud account is needed to deploy this project on GCloud. Currently, GCloud offers a free 90 day trial with 300$ US credit. Please follow the steps below in Sequence to set the application up in Google Cloud.
- - From the Google Cloud web console create a new project named **fun-7-gcloud-project** (top left dropdown)
+ - From the Google Cloud web console create a new project named **fun-7-project** with Project ID: **fun-7-gcloud-project** (top left dropdown)
  - From the GCloud web console activate **Cloud Shell** (shell icon on the top right of the screen).
  - Steps needed to create the Postgres DB instance
    - From the Gcloud web console Enable **Service Networking API**
@@ -176,3 +225,21 @@ If we followed all previous steps exactly the last CLI command we executed shoul
     #creates an endpoint for external inbound calls to the application
     kubectl apply -f ingres.yaml
     ```
+## External calls to the Google Cloud deployed microservices
+For development purposes all 4 microservices have an ingres component created exposing their endpoints remotely.  
+As already mentioned in the previous section for a PROD environment only [fun-7-backend-core](fun-7-backend-core) 
+would have an ingres while the other 3 would communicate using the internal Kubernetes cluster IP addresses assigned to the respective k8s **service** components.  
+External calls to the 4 microservices can be done using their ingres IP addresses.  
+All their Swagger UIs can be accessed by calling **http://<INGRES_IP_ADDRESS>/swagger-ui/index.html**  
+> **Note:** make sure to replace the <INGRES_IP_ADDRESS> placeholder with the actual IP address of the microservice you are testing.
+
+## Local run
+To run the 4 microservices locally here are a few things that are needed after building them in a workspace:
+ - [ads](ads) microservice:
+   - update [application.properties](ads/src/main/resources/application.properties) by setting the respective values for the properties starting with **service.ads.adPartner**
+   - run [com.zlatkosh.ads.AdsApplication](ads/src/main/java/com/zlatkosh/ads/AdsApplication.java)
+ - [customer-support](customer-support) no changes are needed, just run [com.zlatkosh.customersupport.CustomerSupportApplication](customer-support/src/main/java/com/zlatkosh/customersupport/CustomerSupportApplication.java)
+ - [multiplayer](multiplayer) no changes are needed, just run [com.zlatkosh.multiplayer.MultiplayerApplication](multiplayer/src/main/java/com/zlatkosh/multiplayer/MultiplayerApplication.java)
+ - [fun-7-backend-core](fun-7-backend-core)
+   - the runnable class is [com.zlatkosh.ServerApplication](fun-7-backend-core/server/src/main/java/com/zlatkosh/ServerApplication.java)
+   - update the Postgres datasource properties (jdbc-url, username and password) in [DB_datasource.properties](fun-7-backend-core/data-access/src/main/resources/DB_datasource.properties)
