@@ -26,6 +26,7 @@ public class SecurityConfig {
 
     public static final List<String> PERMIT_ALL_PATHS = List.of("/login", "/access/refresh_token", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**");
     public static final List<String> USER_PATHS = List.of("/api/check-services/**");
+    public static final List<String> ADMIN_PATHS = List.of("/api/admin/**");
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, Fun7AuthenticationFilter fun7AuthenticationFilter, Fun7AuthorizationFilter fun7AuthorizationFilter) throws Exception {
@@ -36,7 +37,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .antMatchers(PERMIT_ALL_PATHS.toArray(String[]::new)).permitAll()
                         .antMatchers().hasAuthority("ADMIN")
-                        .antMatchers(USER_PATHS.toArray(String[]::new)).hasAuthority("USER")
+                        .mvcMatchers(USER_PATHS.toArray(String[]::new)).hasAuthority("USER")
+                        .mvcMatchers(ADMIN_PATHS.toArray(String[]::new)).hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilter(fun7AuthenticationFilter)
